@@ -1,25 +1,33 @@
+import os
+
 import requests
 from datetime import datetime, timedelta
 from twilio.rest import Client
+from dotenv import load_dotenv
+load_dotenv()
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
-STOCK_API_KEY = "KTSRD32WAINBJ68Y"
+STOCK_API_KEY = os.getenv('STOCK_API_KEY')
 stock_parameters ={
     "function": "GLOBAL_QUOTE",
     "symbol": STOCK,
     "apikey" : STOCK_API_KEY
 
 }
-NEWS_API_KEY = "127c2977a8f34622989f09c80cddf646"
+NEWS_API_KEY = os.getenv('NEWS_API_KEY')
 news_parameters = {
     "apiKey" : NEWS_API_KEY,
     "language": "en",
     "q": "Tesla",
     "pageSize": 3
 }
-account_sid = "AC833c02b13b1e3b1d6503b56b072e4c97"
-auth_token = "eb80f45d1ae43d441a80b8da30ac62b8"
+account_sid = os.getenv('account_sid')
+auth_token = os.getenv('auth_token')
+
+TWILIO_NUMBER = os.getenv('TWILIO_NUMBER')
+MY_NUMBER = os.getenv('MY_NUMBER')
+
 
 def get_news():
     response = requests.get(url="https://newsapi.org/v2/everything?", params=news_parameters)
@@ -42,7 +50,7 @@ client = Client(account_sid, auth_token)
 abs_flux = abs(flux)
 if abs_flux >= 2:
     print("Get News")
-    #get_news()
+
     response = requests.get(url="https://newsapi.org/v2/everything?", params=news_parameters)
     response.raise_for_status()
     data = response.json()
@@ -52,11 +60,11 @@ if abs_flux >= 2:
 
     for article in formatted_articles:
         message = client.messages \
-            .create(
-            body=article,
-            from_='+12054420086',
-            to='+918291305179'
-        )
+                    .create(
+                body=article,
+                from_= TWILIO_NUMBER,
+                to= MY_NUMBER
+            )
         print(message.status)
 else:
     print("No news")
